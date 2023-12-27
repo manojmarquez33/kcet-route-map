@@ -2,41 +2,38 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:kcet_route_map/Blocks/A_Block.dart';
 
-import 'AppConstants.dart';
-import 'Blocks/Auditorium.dart';
-import 'Blocks/B_Block.dart';
-import 'Blocks/C_Block.dart';
-import 'Blocks/ConferenceHall.dart';
-import 'Blocks/D_Block.dart';
-import 'Blocks/E_Block.dart';
-import 'Pages/MapScreen.dart';
-
-void main() => runApp(MyApp());
+import '../AppConstants.dart';
+import '../Pages/MapScreen.dart';
+import 'Auditorium.dart';
+import 'B_Block.dart';
+import 'C_Block.dart';
+import 'ConferenceHall.dart';
+import 'D_Block.dart';
+import 'E_Block.dart';
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
 final String Class_API = AppConstants.Class_API;
 final Color LightWhite = AppConstants.lightwhite;
 
-class MyApp extends StatelessWidget {
+class A_Block extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Find your Class',
-      home: ClassList(),
+      title: 'A Block',
+      home: A_BlockList(),
     );
   }
 }
 
-class ClassList extends StatefulWidget {
+class A_BlockList extends StatefulWidget {
   @override
-  _ClassListState createState() => _ClassListState();
+  _A_BlockListState createState() => _A_BlockListState();
 }
 
-class _ClassListState extends State<ClassList> {
+class _A_BlockListState extends State<A_BlockList> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
@@ -61,7 +58,9 @@ class _ClassListState extends State<ClassList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-          filteredData = data ?? [];
+          // Filter data where type is "A Block"
+          filteredData =
+              data.where((item) => item['block'] == 'A Block').toList() ?? [];
         });
         return "Success!";
       } else {
@@ -86,7 +85,7 @@ class _ClassListState extends State<ClassList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Find Your Class",
+          "A Block",
           style: TextStyle(color: Color(0xFF0d0d0d)),
         ),
         backgroundColor: Color(0xFFFFFFFF),
@@ -322,7 +321,7 @@ class _ClassListState extends State<ClassList> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Search your class',
+          hintText: 'Search your A Block',
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),

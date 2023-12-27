@@ -2,41 +2,32 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:kcet_route_map/Blocks/A_Block.dart';
 
-import 'AppConstants.dart';
-import 'Blocks/Auditorium.dart';
-import 'Blocks/B_Block.dart';
-import 'Blocks/C_Block.dart';
-import 'Blocks/ConferenceHall.dart';
-import 'Blocks/D_Block.dart';
-import 'Blocks/E_Block.dart';
-import 'Pages/MapScreen.dart';
-
-void main() => runApp(MyApp());
+import '../AppConstants.dart';
+import '../Pages/MapScreen.dart';
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
 final String Class_API = AppConstants.Class_API;
 final Color LightWhite = AppConstants.lightwhite;
 
-class MyApp extends StatelessWidget {
+class ConferenceHall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Find your Class',
-      home: ClassList(),
+      title: 'Conference Hall',
+      home: ConferenceHallList(),
     );
   }
 }
 
-class ClassList extends StatefulWidget {
+class ConferenceHallList extends StatefulWidget {
   @override
-  _ClassListState createState() => _ClassListState();
+  _ConferenceHallListState createState() => _ConferenceHallListState();
 }
 
-class _ClassListState extends State<ClassList> {
+class _ConferenceHallListState extends State<ConferenceHallList> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
@@ -61,7 +52,11 @@ class _ClassListState extends State<ClassList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-          filteredData = data ?? [];
+          // Filter data where type is "Conference Hall"
+          filteredData = data
+                  .where((item) => item['type'] == 'Conference Hall')
+                  .toList() ??
+              [];
         });
         return "Success!";
       } else {
@@ -86,7 +81,7 @@ class _ClassListState extends State<ClassList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Find Your Class",
+          "Conference Hall",
           style: TextStyle(color: Color(0xFF0d0d0d)),
         ),
         backgroundColor: Color(0xFFFFFFFF),
@@ -139,60 +134,35 @@ class _ClassListState extends State<ClassList> {
             ListTile(
               title: Text('A Block'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => A_Block(),
-                  ),
-                );
+                // handle A Block
               },
               leading: Icon(Icons.location_on, color: Colors.pink),
             ),
             ListTile(
               title: Text('B Block'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => B_Block(),
-                  ),
-                );
+                // handle B Block
               },
               leading: Icon(Icons.location_on, color: Colors.green),
             ),
             ListTile(
               title: Text('C Block'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => C_Block(),
-                  ),
-                );
+                // handle C Block
               },
               leading: Icon(Icons.location_on, color: Colors.purpleAccent),
             ),
             ListTile(
               title: Text('D Block'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => D_Block(),
-                  ),
-                );
+                // handle D Block
               },
               leading: Icon(Icons.location_on, color: Colors.orange),
             ),
             ListTile(
               title: Text('E Block'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => E_Block(),
-                  ),
-                );
+                // handle E Block
               },
               leading: Icon(Icons.location_on, color: Colors.brown),
             ),
@@ -203,12 +173,7 @@ class _ClassListState extends State<ClassList> {
             ListTile(
               title: Text('Auditorium'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Auditorium(),
-                  ),
-                );
+                // handle Auditorium
               },
               leading: Icon(Icons.event, color: Colors.purple),
             ),
@@ -322,7 +287,7 @@ class _ClassListState extends State<ClassList> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Search your class',
+          hintText: 'Search your conference hall',
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -358,24 +323,8 @@ class _ClassListState extends State<ClassList> {
               ? ListView.builder(
                   itemCount: filteredData.length,
                   itemBuilder: (BuildContext context, int index) {
-                    String type = filteredData[index]['type'] ?? '';
-
-                    String imagePath;
-                    if (type == 'Class') {
-                      imagePath = 'assets/images/classroom.png';
-                    } else if (type == 'Lab') {
-                      imagePath = 'assets/images/laboratory.png';
-                    } else if (type == 'Conference Hall') {
-                      imagePath = 'assets/images/conference_hall.png';
-                    } else if (type == 'Auditorium') {
-                      imagePath = 'assets/images/auditorium.png';
-                    } else if (type == 'Workshop') {
-                      imagePath = 'assets/images/workshop.png';
-                    } else if (type == 'Canteen') {
-                      imagePath = 'assets/images/canteen.png';
-                    } else {
-                      imagePath = 'assets/images/classroom.png';
-                    }
+                    // Use only "conference_hall.png" image
+                    String imagePath = 'assets/images/conference_hall.png';
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
