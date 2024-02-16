@@ -2,50 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:kcet_route_map/Components/AppDrawer.dart';
 
 import '../AppConstants.dart';
-import '../Pages/MapScreen.dart';
-import 'Auditorium.dart';
-import 'B_Block.dart';
-import 'C_Block.dart';
-import 'ConferenceHall.dart';
-import 'D_Block.dart';
+
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
 final String Class_API = AppConstants.Class_API;
 final Color LightWhite = AppConstants.lightwhite;
 
-class E_Block extends StatelessWidget {
+class VenueScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'E Block',
-      home: E_BlockList(),
-    );
-  }
+  _VenueScreenState createState() => _VenueScreenState();
 }
 
-class E_BlockList extends StatefulWidget {
-  @override
-  _E_BlockListState createState() => _E_BlockListState();
-}
-
-class _E_BlockListState extends State<E_BlockList> {
+class _VenueScreenState extends State<VenueScreen> {
   int _selectedIndex = 0;
-
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home'),
-    Text('Cabin'),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   List data = [];
   List filteredData = [];
@@ -58,9 +30,7 @@ class _E_BlockListState extends State<E_BlockList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-          // Filter data where type is "E Block"
-          filteredData =
-              data.where((item) => item['block'] == 'E Block').toList() ?? [];
+          filteredData = data ?? [];
         });
         return "Success!";
       } else {
@@ -83,18 +53,6 @@ class _E_BlockListState extends State<E_BlockList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "E Block",
-          style: TextStyle(color: Color(0xFF0d0d0d)),
-        ),
-        backgroundColor: Color(0xFFFFFFFF),
-        elevation: 0.0,
-        iconTheme:
-        IconThemeData(color: Colors.black), // Set the icon color here
-      ),
-      backgroundColor: AppConstants.lightwhite,
-      drawer: AppDrawer(),
       body: Column(
         children: <Widget>[
           _buildSearchBar(),
@@ -113,19 +71,16 @@ class _E_BlockListState extends State<E_BlockList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-            (item['class']?.toLowerCase() ?? '')
-                .contains(text.toLowerCase()) ||
-                (item['block']?.toLowerCase() ?? '')
-                    .contains(text.toLowerCase()) ||
-                (item['floor']?.toLowerCase() ?? '')
-                    .contains(text.toLowerCase()) ||
-                (item['landmark']?.toLowerCase() ?? '')
-                    .contains(text.toLowerCase()))
+            (item['class']?.toLowerCase() ?? '').contains(text.toLowerCase()) ||
+                (item['block']?.toLowerCase() ?? '').contains(text.toLowerCase()) ||
+                (item['floor']?.toLowerCase() ?? '').contains(text.toLowerCase()) ||
+                (item['landmark']?.toLowerCase() ?? '').contains(text.toLowerCase()) ||
+                (item['position']?.toLowerCase() ?? '').contains(text.toLowerCase()))
                 .toList();
           });
         },
         decoration: InputDecoration(
-          hintText: 'Search your E Block',
+          hintText: 'Search your class',
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -161,6 +116,7 @@ class _E_BlockListState extends State<E_BlockList> {
           ? ListView.builder(
         itemCount: filteredData.length,
         itemBuilder: (BuildContext context, int index) {
+          String className = filteredData[index]['class'];
           String type = filteredData[index]['type'] ?? '';
 
           String imagePath;
@@ -176,8 +132,14 @@ class _E_BlockListState extends State<E_BlockList> {
             imagePath = 'assets/images/workshop.png';
           } else if (type == 'Canteen') {
             imagePath = 'assets/images/canteen.png';
+          } else if (type == 'Cabin') {
+            imagePath = 'assets/images/cabin.png';
+          } else if (type == 'Restroom') {
+            imagePath = 'assets/images/toilet.png';
+          } else if (type == 'Others') {
+            imagePath = 'assets/images/others.png';
           } else {
-            imagePath = 'assets/images/classroom.png';
+            imagePath = 'assets/images/notfound.png';
           }
 
           return Padding(
@@ -197,7 +159,7 @@ class _E_BlockListState extends State<E_BlockList> {
                   height: 48.0,
                 ),
                 title: Text(
-                  filteredData[index]['class'] ?? '',
+                  className ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
@@ -229,25 +191,60 @@ class _E_BlockListState extends State<E_BlockList> {
                       ],
                     ),
                     SizedBox(height: 5.0),
-                    Text(
-                      '${filteredData[index]['landmark'] ?? ''}',
-                      style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${filteredData[index]['landmark'] ?? ''}',
+                          style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${filteredData[index]['position'] ?? ''}',
+                          style: TextStyle(
+                            color: Colors.grey[900],
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 trailing: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapScreen(
-                          className: filteredData[index]['class'],
-                        ),
-                      ),
-                    );
+                  onTap: () async {
+                    String apiUrl =
+                        '$BASH_URL/getGeoData.php?class=$className';
+                    print(apiUrl);
+                    try {
+                      var response =
+                      await http.get(Uri.parse(apiUrl));
+
+                      if (response.statusCode == 200) {
+                        Map<String, dynamic> geoData =
+                        json.decode(response.body);
+
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => MapScreen(
+                        //       className: className,
+                        //       latitude: geoData['lattitude'] ?? '',
+                        //       longitude: geoData['longtitude'] ?? '',
+                        //     ),
+                        //   ),
+                        // );
+                      } else {
+                        print(
+                            'Failed to load data from API. Status code: ${response.statusCode}');
+                        // Handle error accordingly
+                      }
+                    } catch (e) {
+                      print('Error: $e');
+                      // Handle error accordingly
+                    }
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
@@ -270,9 +267,10 @@ class _E_BlockListState extends State<E_BlockList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 80.0,
+            Image.asset(
+              'assets/images/notfound.png',
+              width: 80.0,
+              height: 80.0,
               color: Colors.grey,
             ),
             SizedBox(height: 10.0),

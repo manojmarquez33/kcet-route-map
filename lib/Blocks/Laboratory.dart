@@ -13,23 +13,23 @@ final String BASH_URL = AppConstants.BASH_URL;
 final String Class_API = AppConstants.Class_API;
 final Color LightWhite = AppConstants.lightwhite;
 
-class Auditorium extends StatelessWidget {
+class Laboratory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Auditorium',
-      home: AuditoriumList(),
+      title: 'Laboratory',
+      home: LaboratoryList(),
     );
   }
 }
 
-class AuditoriumList extends StatefulWidget {
+class LaboratoryList extends StatefulWidget {
   @override
-  _AuditoriumListState createState() => _AuditoriumListState();
+  _LaboratoryListState createState() => _LaboratoryListState();
 }
 
-class _AuditoriumListState extends State<AuditoriumList> {
+class _LaboratoryListState extends State<LaboratoryList> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
@@ -54,9 +54,9 @@ class _AuditoriumListState extends State<AuditoriumList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-          // Filter data where type is "Auditorium"
+          // Filter data where type is "Laboratory"
           filteredData =
-              data.where((item) => item['type'] == 'Auditorium').toList() ?? [];
+              data.where((item) => item['type'] == 'Lab').toList() ?? [];
         });
         return "Success!";
       } else {
@@ -81,7 +81,7 @@ class _AuditoriumListState extends State<AuditoriumList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Auditorium",
+          "Laboratory",
           style: TextStyle(color: Color(0xFF0d0d0d)),
         ),
         backgroundColor: Color(0xFFFFFFFF),
@@ -122,7 +122,7 @@ class _AuditoriumListState extends State<AuditoriumList> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Search your Auditorium',
+          hintText: 'Search your Laboratory',
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -158,8 +158,8 @@ class _AuditoriumListState extends State<AuditoriumList> {
               ? ListView.builder(
                   itemCount: filteredData.length,
                   itemBuilder: (BuildContext context, int index) {
-                    // Use only "Auditorium.png" image
-                    String imagePath = 'assets/images/auditorium.png';
+                    // Use only "Laboratory.png" image
+                    String imagePath = 'assets/images/laboratory.png';
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -269,7 +269,7 @@ class _AuditoriumListState extends State<AuditoriumList> {
                         'assets/images/notfound.png',
                         width: 80.0,
                         height: 80.0,
-                       // color: Colors.grey,
+                        color: Colors.grey,
                       ),
                       SizedBox(height: 10.0),
                       Text(
