@@ -47,15 +47,15 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
 
   Future<String> getData() async {
     try {
-      print('API URL: $BASH_URL$Class_API');
-      var response = await http.get(Uri.parse('$BASH_URL$Class_API'));
+      print('API URL: $BASH_URL/$Class_API');
+      var response = await http.get(Uri.parse('$BASH_URL/$Class_API'));
 
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
           // Filter data where type is "Conference Hall"
           filteredData = data
-              .where((item) => item['type'] == 'Conference Hall')
+              .where((item) => item['type'] == 'Hall')
               .toList() ??
               [];
         });
@@ -110,7 +110,7 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-            (item['class']?.toLowerCase() ?? '')
+            (item['place']?.toLowerCase() ?? '')
                 .contains(text.toLowerCase()) ||
                 (item['block']?.toLowerCase() ?? '')
                     .contains(text.toLowerCase()) ||
@@ -178,7 +178,7 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
                   height: 48.0,
                 ),
                 title: Text(
-                  filteredData[index]['class'] ?? '',
+                  filteredData[index]['place'] ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
@@ -221,14 +221,14 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
                 ),
                 trailing: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapScreen(
-                          className: filteredData[index]['class'],
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => MapScreen(
+                    //       //className: filteredData[index]['class'],
+                    //     ),
+                    //   ),
+                    // );
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
@@ -251,11 +251,12 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 80.0,
-              color: Colors.grey,
-            ),
+            Image.asset(
+                        'assets/images/notfound.png',
+                        width: 80.0,
+                        height: 80.0,
+                       // color: Colors.grey,
+                      ),
             SizedBox(height: 10.0),
             Text(
               "No data found",

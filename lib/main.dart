@@ -11,7 +11,21 @@ import 'Components/AppBottomNavBar .dart';
 import 'Components/AppDrawer.dart';
 import 'Pages/MapScreen.dart';
 
-void main() => runApp(MyApp());
+import 'dart:io';
+
+void main() {
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(MyApp());
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
@@ -61,7 +75,6 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> _widgetOptions = [
     VenueScreen(),
-  MapScreen(className: null,),
   ];
 
   @override

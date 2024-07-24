@@ -56,8 +56,8 @@ class _B_BlockListState extends State<B_BlockList> {
 
   Future<String> getData() async {
     try {
-      print('API URL: $BASH_URL$Class_API');
-      var response = await http.get(Uri.parse('$BASH_URL$Class_API'));
+      print('API URL: $BASH_URL/$Class_API');
+      var response = await http.get(Uri.parse('$BASH_URL/$Class_API'));
 
       if (response.statusCode == 200) {
         setState(() {
@@ -244,14 +244,14 @@ class _B_BlockListState extends State<B_BlockList> {
                 ),
                 trailing: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapScreen(
-                          className: filteredData[index]['class'],
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => MapScreen(
+                    //       //className: filteredData[index]['class'],
+                    //     ),
+                    //   ),
+                    // );
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
@@ -274,11 +274,12 @@ class _B_BlockListState extends State<B_BlockList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 80.0,
-              color: Colors.grey,
-            ),
+            Image.asset(
+                        'assets/images/notfound.png',
+                        width: 80.0,
+                        height: 80.0,
+                       // color: Colors.grey,
+                      ),
             SizedBox(height: 10.0),
             Text(
               "No data found",

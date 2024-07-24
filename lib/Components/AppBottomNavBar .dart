@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kcet_route_map/Pages/ChatBot.dart';
+import '../AppConstants.dart';
 import '../Pages/MapScreen.dart';
 import '../Pages/VenueScreen.dart';
 
@@ -12,7 +14,12 @@ class _AppBottomNavBarState extends State<AppBottomNavBar> {
 
   List<Widget> _widgetOptions = [
     VenueScreen(),
-    MapScreen(className: null,),
+    ChatBot(),
+  ];
+
+  List<Color> _iconColors = [
+    Colors.white, // Color for Venue when not selected
+    Color(0xFF0a1435), // Color for Map when not selected
   ];
 
   @override
@@ -23,24 +30,41 @@ class _AppBottomNavBarState extends State<AppBottomNavBar> {
         body: _widgetOptions.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBarTheme(
           data: NavigationBarThemeData(
-              indicatorColor: Colors.orange,
-              labelTextStyle: MaterialStateProperty.all(
-                  TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+            indicatorColor: AppConstants.Orange,
+            labelTextStyle: MaterialStateProperty.all(
+              TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ),
           child: NavigationBar(
             height: 75,
             backgroundColor: Color(0xFFf1f5fb),
             selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) =>
-                setState(() => this._selectedIndex = index),
+            onDestinationSelected: (index) {
+              setState(() {
+                this._selectedIndex = index;
+                _updateIconColors();
+              });
+            },
             destinations: [
               NavigationDestination(
-                  icon: Icon(Icons.home), label: 'Venue'),
+                icon: Icon(Icons.home, color: _iconColors[0]),
+                label: 'Home',
+              ),
               NavigationDestination(
-                  icon: Icon(Icons.location_on_outlined), label: 'Map'),
+                icon: Icon(Icons.chat, color: _iconColors[1]),
+                label: 'Bot',
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _updateIconColors() {
+    _iconColors = [
+      _selectedIndex == 0 ? Colors.white : Color(0xFF0a1435),
+      _selectedIndex == 1 ? Colors.white : Color(0xFF0a1435),
+    ];
   }
 }

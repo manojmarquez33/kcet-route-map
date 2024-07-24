@@ -48,8 +48,8 @@ class _LaboratoryListState extends State<LaboratoryList> {
 
   Future<String> getData() async {
     try {
-      print('API URL: $BASH_URL$Class_API');
-      var response = await http.get(Uri.parse('$BASH_URL$Class_API'));
+      print('API URL: $BASH_URL/$Class_API');
+      var response = await http.get(Uri.parse('$BASH_URL/$Class_API'));
 
       if (response.statusCode == 200) {
         setState(() {
@@ -110,7 +110,7 @@ class _LaboratoryListState extends State<LaboratoryList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-                    (item['class']?.toLowerCase() ?? '')
+                    (item['place']?.toLowerCase() ?? '')
                         .contains(text.toLowerCase()) ||
                     (item['block']?.toLowerCase() ?? '')
                         .contains(text.toLowerCase()) ||
@@ -178,7 +178,7 @@ class _LaboratoryListState extends State<LaboratoryList> {
                             height: 48.0,
                           ),
                           title: Text(
-                            filteredData[index]['class'] ?? '',
+                            filteredData[index]['place'] ?? '',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18.0,

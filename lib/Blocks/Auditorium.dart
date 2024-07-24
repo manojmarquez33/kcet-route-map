@@ -48,8 +48,8 @@ class _AuditoriumListState extends State<AuditoriumList> {
 
   Future<String> getData() async {
     try {
-      print('API URL: $BASH_URL$Class_API');
-      var response = await http.get(Uri.parse('$BASH_URL$Class_API'));
+      print('API URL: $BASH_URL/$Class_API');
+      var response = await http.get(Uri.parse('$BASH_URL/$Class_API'));
 
       if (response.statusCode == 200) {
         setState(() {
