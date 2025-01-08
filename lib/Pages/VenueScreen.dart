@@ -1,7 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:kcet_route_map/Pages/ChatBot.dart';
+import 'package:kcet_route_map/Pages/ChatBot.dart';
+import 'package:kcet_route_map/Pages/DetailsPage.dart';
 import '../AppConstants.dart';
+import 'ChatBot.dart';
+import 'DetailsPage.dart';
+// Import the detailed venue screen
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
@@ -38,7 +44,6 @@ class _VenueScreenState extends State<VenueScreen> {
       throw Exception('Failed to connect to the API');
     }
   }
-
 
   @override
   void initState() {
@@ -141,8 +146,14 @@ class _VenueScreenState extends State<VenueScreen> {
             case 'Restroom':
               imagePath = 'assets/images/toilet.png';
               break;
+            case 'Office':
+              imagePath = 'assets/images/office.png';
+              break;
             case 'Others':
               imagePath = 'assets/images/others.png';
+              break;
+            case 'Library':
+              imagePath = 'assets/images/library.png';
               break;
             default:
               imagePath = 'assets/images/notfound.png';
@@ -221,7 +232,8 @@ class _VenueScreenState extends State<VenueScreen> {
                 ),
                 trailing: GestureDetector(
                   onTap: () async {
-                    String apiUrl = '$BASH_URL/getGeoData.php?class=$className';
+                    String apiUrl = '$BASH_URL/${AppConstants.ChatBot_API}/?destination=$className';
+
                     print(apiUrl);
                     try {
                       var response = await http.get(Uri.parse(apiUrl));
@@ -229,35 +241,49 @@ class _VenueScreenState extends State<VenueScreen> {
                       if (response.statusCode == 200) {
                         Map<String, dynamic> geoData = json.decode(response.body);
 
-                        // Uncomment and implement the navigation to the MapScreen
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => MapScreen(
-                        //       className: className,
-                        //       latitude: geoData['latitude'] ?? '',
-                        //       longitude: geoData['longitude'] ?? '',
-                        //     ),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailedVenueScreen(
+                              className: className,
+                              floor: filteredData[index]['floor'] ?? '',
+                              block: filteredData[index]['block'] ?? '',
+                              geoData: geoData,
+                            ),
+                          ),
+                        );
                       } else {
                         print('Failed to load data from API. Status code: ${response.statusCode}');
-                        // Handle error accordingly
                       }
                     } catch (e) {
                       print('Error: $e');
-                      // Handle error accordingly
                     }
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppConstants.Orange,
+                      color: Colors.orange, // Replace with your `AppConstants.Orange`
                     ),
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Generate the prompt
+                        String placeName = filteredData[index]['place'];
+                        String promptText = "Help me to reach $placeName";
+
+
+                        // Navigate to ChatbotPage and pass the promptText
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatBot(promptText: promptText),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
