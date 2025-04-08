@@ -53,9 +53,9 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-          // Filter data where type is "Conference Hall"
+
           filteredData = data
-              .where((item) => item['type'] == 'Hall')
+              .where((item) => item['type'] == 'Conference Hall')
               .toList() ??
               [];
         });

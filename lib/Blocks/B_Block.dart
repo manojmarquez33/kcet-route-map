@@ -201,7 +201,7 @@ class _B_BlockListState extends State<B_BlockList> {
                   height: 48.0,
                 ),
                 title: Text(
-                  filteredData[index]['class'] ?? '',
+                  filteredData[index]['place'] ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,
