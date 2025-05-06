@@ -5,9 +5,14 @@ import 'package:http/http.dart' as http;
 import 'package:kcet_route_map/Components/AppDrawer.dart';
 
 import '../AppConstants.dart';
+import '../Pages/ChatBot.dart';
+import '../Pages/MapScreen.dart';
+
+import '../AppConstants.dart';
 import '../Pages/MapScreen.dart';
 import 'Auditorium.dart';
-import 'B_Block.dart';
+import 'C_Block.dart';
+import 'C_Block.dart';
 import 'ConferenceHall.dart';
 import 'D_Block.dart';
 import 'E_Block.dart';
@@ -113,7 +118,7 @@ class _C_BlockListState extends State<C_BlockList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-            (item['class']?.toLowerCase() ?? '')
+            (item['place']?.toLowerCase() ?? '')
                 .contains(text.toLowerCase()) ||
                 (item['block']?.toLowerCase() ?? '')
                     .contains(text.toLowerCase()) ||
@@ -255,9 +260,24 @@ class _C_BlockListState extends State<C_BlockList> {
                       shape: BoxShape.circle,
                       color: AppConstants.Orange,
                     ),
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Generate the prompt
+                        String placeName = filteredData[index]['place'];
+                        String promptText = "Help me to reach $placeName";
+
+                        // Navigate to ChatbotPage and pass the promptText
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatBot(promptText: promptText),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -271,11 +291,11 @@ class _C_BlockListState extends State<C_BlockList> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-                        'assets/images/notfound.png',
-                        width: 80.0,
-                        height: 80.0,
-                       // color: Colors.grey,
-                      ),
+              'assets/images/notfound.png',
+              width: 80.0,
+              height: 80.0,
+              // color: Colors.grey,
+            ),
             SizedBox(height: 10.0),
             Text(
               "No data found",

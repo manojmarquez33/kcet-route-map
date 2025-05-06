@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import '../AppConstants.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+
 
 final LinearGradient appColor = AppConstants.BlueWhite;
 final String BASH_URL = AppConstants.BASH_URL;
@@ -12,7 +15,7 @@ final String ChatBotAPI = AppConstants.ChatBot_API;
 final Color LightWhite = AppConstants.lightwhite;
 
 class ChatBot extends StatefulWidget {
-  final String? promptText; // Accept optional initial prompt
+  final String? promptText;
 
   ChatBot({this.promptText});
 
@@ -24,20 +27,53 @@ class _ChatBotState extends State<ChatBot> {
   final List<Map<String, dynamic>> _messages = [];
   List<String> destinations = [];
   List<String> _imagesToShow = [];
+  List<String> _suggestions = [];
+
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToBottom = false;
+
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.offset < _scrollController.position.maxScrollExtent - 100) {
+        if (!_showScrollToBottom) {
+          setState(() {
+            _showScrollToBottom = true;
+          });
+        }
+      } else {
+        if (_showScrollToBottom) {
+          setState(() {
+            _showScrollToBottom = false;
+          });
+        }
+      }
+    });
+
     if (widget.promptText != null) {
       _controller.text = widget.promptText!;
       if (_controller.text.isNotEmpty) {
         _fetchDestinations().then((_) {
-          _sendMessage(widget.promptText!); // Send the message after fetching destinations
+          _sendMessage(widget.promptText!);
         });
       }
     } else {
       _fetchDestinations();
     }
+  }
+
+
+  void _updateSuggestions(String input) {
+    final words = input.toLowerCase().split(' ');
+    final lastWord = words.isNotEmpty ? words.last : '';
+
+    setState(() {
+      _suggestions = destinations
+          .where((destination) => destination.toLowerCase().startsWith(lastWord))
+          .toList();
+    });
   }
 
 
@@ -48,19 +84,25 @@ class _ChatBotState extends State<ChatBot> {
         headers: {'X-SSL-CERTIFICATE': 'skip'},
       );
 
-      // Log the full response for debugging
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        var decodedResponse = json.decode(response.body);
-        if (decodedResponse is List<dynamic>) {
-          setState(() {
-            destinations = decodedResponse
-                .map((item) => item.toString().toLowerCase())
-                .toList();
-          });
+        final decoded = json.decode(response.body);
+
+        List<dynamic> destinationList;
+
+        if (decoded is List) {
+          destinationList = decoded;
+        } else if (decoded is Map && decoded.containsKey('destinations')) {
+          destinationList = decoded['destinations'];
+        } else {
+          throw Exception('Unexpected response format: $decoded');
         }
+
+        setState(() {
+          destinations = destinationList.map((e) => e.toString().toLowerCase()).toList();
+        });
       } else {
         throw Exception('Failed to load destinations: ${response.statusCode}');
       }
@@ -68,6 +110,7 @@ class _ChatBotState extends State<ChatBot> {
       print('Error fetching destinations: $e');
     }
   }
+
 
   Future<void> _fetchDetails(String destination) async {
     try {
@@ -117,6 +160,8 @@ class _ChatBotState extends State<ChatBot> {
             });
             return; // Exit if valid data is found
           }
+          _scrollToBottom();
+
         }
       }
 
@@ -126,9 +171,6 @@ class _ChatBotState extends State<ChatBot> {
       _addErrorMessage(destination);
     }
   }
-
-
-
 
 
   void _addErrorMessage(String destination) {
@@ -164,6 +206,7 @@ class _ChatBotState extends State<ChatBot> {
   void _sendMessage([String? text]) {
     final messageText = text ?? _controller.text.trim();
     if (messageText.isNotEmpty) {
+      _suggestions.clear();
       setState(() {
         _messages.add({'type': 'sent', 'content': messageText});
       });
@@ -172,6 +215,18 @@ class _ChatBotState extends State<ChatBot> {
       }
       _controller.clear();
     }
+    _scrollToBottom();
+
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   bool _handleWelcomeAndFarewell(String messageText) {
@@ -234,9 +289,9 @@ class _ChatBotState extends State<ChatBot> {
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text('Map View'),
-          ),
+          // appBar: AppBar(
+          //   title: Text('Map View'),
+          // ),
           body: Stack(
             children: [
               PhotoViewGallery.builder(
@@ -315,106 +370,173 @@ class _ChatBotState extends State<ChatBot> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                if (message['type'] == 'sent') {
-                  return Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      margin: EdgeInsets.all(8.0),
-                      padding: EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Text(
-                        message['content'],
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  );
-                } else {
-                  final images = (message['content']['images'] as List<dynamic>)
-                      .map((e) => e.toString())
-                      .toList();
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
+      body: Stack(
+        children: [
+          Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  if (message['type'] == 'sent') {
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
                         margin: EdgeInsets.all(8.0),
                         padding: EdgeInsets.all(10.0),
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: Colors.blueAccent,
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         child: Text(
-                          message['content']['text'],
-                          style: TextStyle(color: Colors.black87),
+                          message['content'],
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      ...images.map((url) =>
-                          GestureDetector(
-                            onTap: () {
-                              _showImageGallery(images, images.indexOf(url));
-                            },
-                            child: Container(
-                              margin: EdgeInsets.all(8.0),
-                              child: Image.network(
-                                url,
-                                errorBuilder: (context, error, stackTrace) {
-                                  print('Error loading image: $error');
-                                  return Text('Image load error');
-                                },
+                    );
+                  } else {
+                    final images = (message['content']['images'] as List<dynamic>)
+                        .map((e) => e.toString())
+                        .toList();
+        
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: AnimatedTextKit(
+                            animatedTexts: [
+                              TypewriterAnimatedText(
+                                message['content']['text'],
+                                textStyle: const TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.black87,
+                                ),
+                                speed: const Duration(milliseconds: 3),
                               ),
-                            ),
-                          )).toList(),
-                    ],
-                  );
-                }
-              },
+                            ],
+                            isRepeatingAnimation: false,
+                            totalRepeatCount: 1,
+                          )
+
+                        ),
+                        ...images.map((url) =>
+                            GestureDetector(
+                              onTap: () {
+                                _showImageGallery(images, images.indexOf(url));
+                              },
+                              child: Container(
+                                margin: EdgeInsets.all(8.0),
+                                child: Image.network(
+                                  url,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('Error loading image: $error');
+                                    return Text('Image load error');
+                                  },
+                                ),
+                              ),
+                            )).toList(),
+                      ],
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter destination...',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
+            Column(
+              children: [
+                if (_suggestions.isNotEmpty)
+                  Container(
+                    constraints: BoxConstraints(maxHeight: 200),
+                    margin: EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onSubmitted: _sendMessage,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _suggestions.length,
+                      itemBuilder: (context, index) {
+                        final suggestion = _suggestions[index];
+                        return ListTile(
+                          title: Text(suggestion),
+                            onTap: () {
+                              final words = _controller.text.split(' ');
+                              if (words.isNotEmpty) {
+                                words[words.length - 1] = suggestion;
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  _controller.text = words.join(' ');
+                                  _controller.selection = TextSelection.fromPosition(
+                                    TextPosition(offset: _controller.text.length),
+                                  );
+                                });
+                              }
+                              _suggestions.clear();
+                              setState(() {});
+                            }
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 8.0),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent,
-                    shape: BoxShape.circle,
+                if (_showScrollToBottom)
+                  Positioned(
+                    bottom: 80,
+                    right: 20,
+                    child: FloatingActionButton(
+                      mini: true,
+                      onPressed: _scrollToBottom,
+                     // backgroundColor: Colors.blueAccent,
+                      child: Icon(Icons.arrow_downward),
+                    ),
                   ),
-                  child: IconButton(
-                    icon: Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendMessage,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: 'Enter destination...',
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
+                          ),
+                          onChanged: _updateSuggestions,
+                          onSubmitted: _sendMessage,
+                        ),
+                      ),
+                      SizedBox(width: 8.0),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.send, color: Colors.white),
+                          onPressed: _sendMessage,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+
+          ],
+        ),
+    ],
       ),
     );
   }

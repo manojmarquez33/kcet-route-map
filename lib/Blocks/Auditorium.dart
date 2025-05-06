@@ -6,6 +6,7 @@ import 'package:kcet_route_map/Components/AppDrawer.dart';
 
 import '../AppConstants.dart';
 import '../Components/AppBottomNavBar .dart';
+import '../Pages/ChatBot.dart';
 import '../Pages/MapScreen.dart';
 
 final LinearGradient appColor = AppConstants.BlueWhite;
@@ -110,7 +111,7 @@ class _AuditoriumListState extends State<AuditoriumList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-                    (item['class']?.toLowerCase() ?? '')
+                    (item['place']?.toLowerCase() ?? '')
                         .contains(text.toLowerCase()) ||
                     (item['block']?.toLowerCase() ?? '')
                         .contains(text.toLowerCase()) ||
@@ -178,7 +179,7 @@ class _AuditoriumListState extends State<AuditoriumList> {
                             height: 48.0,
                           ),
                           title: Text(
-                            filteredData[index]['class'] ?? '',
+                            filteredData[index]['place'] ?? '',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18.0,
@@ -250,9 +251,24 @@ class _AuditoriumListState extends State<AuditoriumList> {
                                 shape: BoxShape.circle,
                                 color: AppConstants.Orange,
                               ),
-                              child: Icon(
-                                Icons.location_on,
-                                color: Colors.white,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.location_on,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  // Generate the prompt
+                                  String placeName = filteredData[index]['place'];
+                                  String promptText = "Help me to reach $placeName";
+
+                                  // Navigate to ChatbotPage and pass the promptText
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatBot(promptText: promptText),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),

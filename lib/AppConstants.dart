@@ -21,8 +21,7 @@ class AppConstants {
   static final Color white = Color(0xFFFFFFFF);
 
   // API URLs
-  static final String BASH_URL = 'https://192.168.196.51/routemap';
-  //static final String BASH_URL = 'https://kcetroutemmap.liveblog365.com';
+  static final String BASH_URL = 'https://routemap.codemub.com';
   static final String Class_API = 'ClassAPI.php';
   static final String ChatBot_API = 'ChatBotAPI.php';
 }

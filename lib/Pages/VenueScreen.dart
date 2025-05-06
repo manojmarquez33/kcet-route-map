@@ -275,7 +275,6 @@ class _VenueScreenState extends State<VenueScreen> {
                         String placeName = filteredData[index]['place'];
                         String promptText = "Help me to reach $placeName";
 
-
                         // Navigate to ChatbotPage and pass the promptText
                         Navigator.push(
                           context,

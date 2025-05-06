@@ -6,6 +6,7 @@ import 'package:kcet_route_map/Components/AppBottomNavBar%20.dart';
 
 import '../AppConstants.dart';
 import '../Components/AppDrawer.dart';
+import '../Pages/ChatBot.dart';
 import '../Pages/MapScreen.dart';
 import 'Auditorium.dart';
 import 'B_Block.dart';
@@ -115,7 +116,7 @@ class _A_BlockListState extends State<A_BlockList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-            (item['class']?.toLowerCase() ?? '')
+            (item['place']?.toLowerCase() ?? '')
                 .contains(text.toLowerCase()) ||
                 (item['block']?.toLowerCase() ?? '')
                     .contains(text.toLowerCase()) ||
@@ -255,9 +256,27 @@ class _A_BlockListState extends State<A_BlockList> {
                       shape: BoxShape.circle,
                       color: AppConstants.Orange,
                     ),
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        String placeName = filteredData[index]['place'];
+                        String promptText = "Help me to reach $placeName";
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Scaffold(
+                              drawer: AppDrawer(),
+                              body: ChatBot(promptText: promptText),
+                              //bottomNavigationBar: AppBottomNavBar(), // if needed here
+                            ),
+                          ),
+                        );
+                      },
+
                     ),
                   ),
                 ),

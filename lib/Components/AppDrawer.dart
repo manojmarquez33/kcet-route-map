@@ -12,6 +12,7 @@ import '../Blocks/C_Block.dart';
 import '../Blocks/ConferenceHall.dart';
 import '../Blocks/D_Block.dart';
 import '../Blocks/E_Block.dart';
+import '../Pages/AboutUs.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -215,7 +216,12 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.info),
             title: Text('About'),
             onTap: () {
-              // handle about
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AboutUsPage(),
+                ),
+              );
             },
           ),
           ListTile(

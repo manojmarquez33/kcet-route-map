@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:kcet_route_map/Components/AppDrawer.dart';
 
 import '../AppConstants.dart';
+import '../Pages/ChatBot.dart';
 import '../Pages/MapScreen.dart';
 import 'Auditorium.dart';
 import 'B_Block.dart';
@@ -113,7 +114,7 @@ class _E_BlockListState extends State<E_BlockList> {
           setState(() {
             filteredData = data
                 .where((item) =>
-            (item['class']?.toLowerCase() ?? '')
+            (item['place']?.toLowerCase() ?? '')
                 .contains(text.toLowerCase()) ||
                 (item['block']?.toLowerCase() ?? '')
                     .contains(text.toLowerCase()) ||
@@ -255,9 +256,24 @@ class _E_BlockListState extends State<E_BlockList> {
                       shape: BoxShape.circle,
                       color: AppConstants.Orange,
                     ),
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Generate the prompt
+                        String placeName = filteredData[index]['place'];
+                        String promptText = "Help me to reach $placeName";
+
+                        // Navigate to ChatbotPage and pass the promptText
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatBot(promptText: promptText),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

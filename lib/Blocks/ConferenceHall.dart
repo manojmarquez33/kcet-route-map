@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:kcet_route_map/Components/AppDrawer.dart';
 
 import '../AppConstants.dart';
+import '../Pages/ChatBot.dart';
 import '../Pages/MapScreen.dart';
 
 final LinearGradient appColor = AppConstants.BlueWhite;
@@ -53,9 +54,9 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
       if (response.statusCode == 200) {
         setState(() {
           data = json.decode(response.body);
-
+          // Filter data where type is "Conference Hall"
           filteredData = data
-              .where((item) => item['type'] == 'Conference Hall')
+              .where((item) => item['type'] == 'Hall')
               .toList() ??
               [];
         });
@@ -236,9 +237,24 @@ class _ConferenceHallListState extends State<ConferenceHallList> {
                       shape: BoxShape.circle,
                       color: AppConstants.Orange,
                     ),
-                    child: Icon(
-                      Icons.location_on,
-                      color: Colors.white,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        // Generate the prompt
+                        String placeName = filteredData[index]['place'];
+                        String promptText = "Help me to reach $placeName";
+
+                        // Navigate to ChatbotPage and pass the promptText
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatBot(promptText: promptText),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
